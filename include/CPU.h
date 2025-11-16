@@ -14,8 +14,8 @@ private:
 public:
   void connect_bus(Memory *memory_device) { bus = memory_device; }
 
-  uint32_t &x(uint32_t n);
-  uint32_t get_pc() const;
+  uint32_t &x(const uint32_t n);
+  [[nodiscard]] uint32_t get_pc() const;
 
   void step();
 };

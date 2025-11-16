@@ -4,5 +4,5 @@
 
 class ALU {
 public:
-  uint32_t execute(uint32_t src_a, uint32_t src_b, ALUControl control_signal);
+  static uint32_t execute(uint32_t src_a, uint32_t src_b, ALUControl control_signal);
 };

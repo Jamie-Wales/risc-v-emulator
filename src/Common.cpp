@@ -21,7 +21,7 @@ bool load_binary(RAM &memory, const std::string &filename,
   std::vector<char> buffer(size);
   if (file.read(buffer.data(), size)) {
     for (size_t i = 0; i < size; ++i) {
-      memory.write_byte(start_address + i, (uint8_t)buffer[i]);
+      memory.write_byte(start_address + i, static_cast<uint8_t>(buffer[i]));
     }
     std::cout << "Loaded " << size << " bytes into memory at 0x" << std::hex
               << start_address << std::endl;

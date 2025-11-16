@@ -4,6 +4,8 @@
 
 class Memory {
 public:
+  virtual ~Memory() = default;
+
   virtual uint32_t read(uint32_t address) = 0;
   virtual void write(uint32_t address, uint32_t data) = 0;
 };
