@@ -1,8 +1,8 @@
 #pragma once
 #include "ALU.h"
-#include "Memory.h" // User provided Common.h/Memory.h
+#include "Memory.h"
 #include <array>
-#include <cstdint>
+#define DEBUG 1;
 
 class CPU {
 private:
