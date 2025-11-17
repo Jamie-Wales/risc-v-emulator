@@ -18,6 +18,10 @@ inline int32_t extractSTypeImm(uint32_t raw_value) {
   return (imm12 << 20) >> 20;
 }
 
+inline int32_t extractUTypeImm(uint32_t raw_value) {
+  return (int32_t)(raw_value & 0xFFFFF000);
+}
+
 inline int32_t extractBTypeImm(uint32_t raw_value) {
   int32_t bit_12 = (raw_value >> 31) & 0x1;
   int32_t bit_11 = (raw_value >> 7) & 0x1;
@@ -86,76 +90,57 @@ DecodedInstruction decode(const uint32_t raw_value) {
   instr.rs1_addr = (raw_value >> 15) & 0x1F;
   instr.rs2_addr = (raw_value >> 20) & 0x1F;
 
-  /* ADD Register */
   switch (opcode) {
-  case 0x33: {
-    instr.use_immediate = false;
-    instr.reg_write = true;
+  case 0x33: // R-Type (ADD, SUB)
+    instr.set(Ctrl::REG_WRITE);
     instr.alu_op = get_control(raw_value, opcode);
     break;
-  }
 
-  /* ADD Immediate */
-  case 0x13: {
-    instr.use_immediate = true;
-    instr.reg_write = true;
+  case 0x13: // I-Type (ADDI)
+    instr.set(Ctrl::REG_WRITE | Ctrl::USE_IMM);
     instr.immediate = extractITypeImm(raw_value);
     instr.alu_op = get_control(raw_value, opcode);
     break;
-  }
 
-  /* LOAD Immediate */
-  case 0x03: {
-    instr.use_immediate = true;
-    instr.reg_write = true;
-    instr.mem_read = true;
+  case 0x03: // LOAD (LW)
+    instr.set(Ctrl::REG_WRITE | Ctrl::USE_IMM | Ctrl::MEM_READ);
     instr.immediate = extractITypeImm(raw_value);
     instr.alu_op = ALUControl::ADD;
     break;
-  }
 
-  /* Store Immediate */
-  case 0x23: {
-    instr.use_immediate = true;
-    instr.reg_write = false;
-    instr.mem_write = true;
+  case 0x23: // STORE (SW)
+    instr.set(Ctrl::MEM_WRITE | Ctrl::USE_IMM);
     instr.immediate = extractSTypeImm(raw_value);
     instr.alu_op = ALUControl::ADD;
     break;
-  }
 
-  /* Branch */
-  case 0x63: {
-    instr.use_immediate = false;
-    instr.reg_write = false;
-    instr.mem_read = false;
-    instr.mem_write = false;
+  case 0x6F: // JAL
+    instr.set(Ctrl::REG_WRITE | Ctrl::USE_IMM | Ctrl::IS_JUMP);
+    instr.immediate = extractJTypeImm(raw_value);
+    break;
 
+  case 0x67: // JALR
+    instr.set(Ctrl::REG_WRITE | Ctrl::USE_IMM | Ctrl::IS_JUMP | Ctrl::IS_JALR);
+    instr.immediate = extractITypeImm(raw_value);
+    break;
+
+  case 0x37: // LUI
+    instr.set(Ctrl::REG_WRITE | Ctrl::USE_IMM);
+    instr.immediate = extractUTypeImm(raw_value);
+    instr.rs1_addr = 0; // Force x0
+    instr.alu_op = ALUControl::ADD;
+    break;
+
+  case 0x17: // AUIPC
+    instr.set(Ctrl::REG_WRITE | Ctrl::USE_IMM | Ctrl::IS_AUIPC);
+    instr.immediate = extractUTypeImm(raw_value);
+    instr.alu_op = ALUControl::ADD;
+    break;
+  case 0x63:
     instr.branch_type = decode_branch_type(f3);
     instr.immediate = extractBTypeImm(raw_value);
     instr.alu_op = ALUControl::ADD;
     break;
-  }
-
-  case 0x6F: {
-    instr.use_immediate = true;
-    instr.reg_write = true;
-    instr.is_jump = true;
-    instr.is_jalr = false;
-    instr.immediate = extractJTypeImm(raw_value);
-    instr.alu_op = ALUControl::ADD;
-    break;
-  }
-
-    case 0x67: {
-    instr.use_immediate = true;
-    instr.reg_write = true;
-    instr.is_jump = true;
-    instr.is_jalr = true;
-    instr.immediate = extractITypeImm(raw_value);
-    instr.alu_op = ALUControl::ADD;
-    break;
-    }
 
   default:
     std::cout << "Not Implemented Yet" << std::endl;
