@@ -1,21 +1,23 @@
 #pragma once
+
 #include "ALU.h"
 #include "Memory.h"
 #include <array>
-#define DEBUG 1;
+#include <cstdint>
+#define DEBUG
 
 class CPU {
 private:
-  uint32_t pc = 0;
-  std::array<uint32_t, 32> registers;
-  Memory *bus = nullptr;
+  uint64_t pc;
+  std::array<uint64_t, 32> registers;
+  Memory *bus;
   ALU alu;
 
 public:
-  void connect_bus(Memory *memory_device) { bus = memory_device; }
-
-  uint32_t &x(const uint32_t n);
-  [[nodiscard]] uint32_t get_pc() const;
-
+  explicit CPU(Memory *memory);
+  void handle_sys_call(uint64_t id);
+  void set_pc(uint64_t start_addr);
+  uint64_t get_pc() const;
+  uint64_t &x(const uint32_t n);
   void step();
 };

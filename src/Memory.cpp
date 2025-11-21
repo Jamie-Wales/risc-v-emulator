@@ -1,32 +1,17 @@
-#include <Memory.h>
-#include <cstdint>
+#include "Memory.h"
 
-uint32_t RAM::read(uint32_t address) {
-  if (address + 3 >= data.size()) {
-    throw std::runtime_error("Bus error address larger than data size");
-  }
-
-  const uint32_t byte0 = data[address];
-  const uint32_t byte1 = data[address + 1];
-  const uint32_t byte2 = data[address + 2];
-  const uint32_t byte3 = data[address + 3];
-
-  return byte0 | (byte1 << 8) | (byte2 << 16) | (byte3 << 24);
-}
-
-void RAM::write(const uint32_t address, const uint32_t value) {
-  if (address + 3 >= data.size())
-    return;
-
-  data[address] = value & 0xFF;
-  data[address + 1] = (value >> 8) & 0xFF;
-  data[address + 2] = (value >> 16) & 0xFF;
-  data[address + 3] = (value >> 24) & 0xFF;
-}
-
-void RAM::write_byte(const uint32_t address, const uint8_t val) {
-  if (address < data.size()) {
-    data[address] = val;
-  }
-}
 RAM::RAM(size_t size_bytes) { data.resize(size_bytes, 0); }
+
+void RAM::read(uint64_t addr, uint8_t *buffer, size_t size) {
+  if (addr + size > data.size()) {
+    memset(buffer, 0, size);
+    return;
+  }
+  memcpy(buffer, &data[addr], size);
+}
+
+void RAM::write(uint64_t addr, const uint8_t *buffer, size_t size) {
+  if (addr + size > data.size())
+    return;
+  memcpy(&data[addr], buffer, size);
+}
