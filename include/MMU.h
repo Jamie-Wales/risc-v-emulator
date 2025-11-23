@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Memory.h"
+#include "Types.h"
 #include <cstdint>
 
 namespace PTE {
@@ -13,9 +14,6 @@ const uint64_t G = 1 << 5; // Global
 const uint64_t A = 1 << 6; // Accessed
 const uint64_t D = 1 << 7; // Dirty
 } // namespace PTE
-
-enum class AccessType { LOAD, STORE, FETCH };
-enum class PrivilegeMode { USER = 0, SUPERVISOR = 1, MACHINE = 3 };
 
 struct TranslationResult {
   uint64_t physical_address;

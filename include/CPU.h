@@ -4,6 +4,7 @@
 #include "CSR.h"
 #include "MMU.h"
 #include "Memory.h"
+#include "Types.h"
 #include <array>
 #include <cstdint>
 #define DEBUG
@@ -16,8 +17,10 @@ private:
   CSR csr;
   Memory *bus;
   ALU alu;
+  PrivilegeMode current_mode = PrivilegeMode::MACHINE;
 
 public:
+  void raise_exception(ExceptionCode code, uint64_t tval);
   explicit CPU(Memory *memory);
   void handle_sys_call(uint64_t id);
   void set_pc(uint64_t start_addr);

@@ -86,7 +86,20 @@ DecodedInstruction decode(const uint32_t raw_value) {
     } else {
       instr.set(Ctrl::IS_CSR);
       instr.immediate = extractITypeImm(raw_value);
-      instr.csr_op = extractCsrOp(f3);
+      switch (f3) {
+      case 1:
+        instr.csr_op = CSROp::RW;
+        break;
+      case 2:
+        instr.csr_op = CSROp::RS;
+        break;
+      case 3:
+        instr.csr_op = CSROp::RC;
+        break;
+      default:
+        instr.csr_op = CSROp::NONE;
+        break;
+      }
     }
     break;
   }

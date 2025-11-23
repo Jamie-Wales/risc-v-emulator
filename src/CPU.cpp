@@ -1,9 +1,25 @@
 #include "CPU.h"
 #include "Decoder.h"
+#include "Types.h"
 #include <iostream>
 
 CPU::CPU(Memory *memory) : pc(0), bus(memory), mmu(memory) {
   registers.fill(0);
+}
+void CPU::raise_exception(ExceptionCode code, uint64_t tval) {
+  uint64_t exception_pc = pc;
+  csr.write(CSR_Addr::SCAUSE, (uint64_t)code);
+  csr.write(CSR_Addr::SEPC, exception_pc);
+  csr.write(CSR_Addr::STVAL, tval);
+
+  uint64_t sstatus = csr.read(CSR_Addr::SSTATUS);
+  // #TODO: bit manipulation
+  csr.write(CSR_Addr::SSTATUS, sstatus);
+  pc = csr.read(CSR_Addr::STVEC) & ~3; // Mask out mode bits
+#ifdef DEBUG
+  std::cout << "[Trap] Code: " << (int)code << " Jump to: " << std::hex << pc
+            << std::endl;
+#endif
 }
 
 void CPU::set_pc(uint64_t start_addr) { pc = start_addr; }
@@ -30,8 +46,6 @@ void CPU::handle_sys_call(uint64_t id) {
     uint64_t fd = x(10);
     uint64_t buf_addr = x(11);
     uint64_t count = x(12);
-    // Note: To be fully correct, we should translate buf_addr here too!
-    // But for basic "Hello World" in bare metal, physical is fine.
     if (fd == 1 || fd == 2) {
       for (uint64_t i = 0; i < count; ++i) {
         char c = (char)bus->read8(buf_addr + i);

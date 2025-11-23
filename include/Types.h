@@ -20,6 +20,22 @@ enum class ALUControl { ADD, SUB, AND, OR, XOR, SLL, SRL, SRA, SLT, SLTU };
 enum class BranchFunc { NONE, BEQ, BNE, BLT, BGE, BLTU, BGEU };
 enum class MemWidth { BYTE, HALF, WORD, DOUBLE };
 enum class CSROp { NONE, RW, RS, RC };
+enum class AccessType { LOAD, STORE, FETCH };
+enum class PrivilegeMode { USER = 0, SUPERVISOR = 1, MACHINE = 3 };
+enum class ExceptionCode {
+  InstructionAddrMisaligned = 0,
+  InstructionAccessFault = 1,
+  IllegalInstruction = 2,
+  Breakpoint = 3,
+  LoadAccessFault = 5,
+  StoreAccessFault = 7,
+  UserECall = 8,
+  SupervisorECall = 9,
+  MachineECall = 11,
+  InstructionPageFault = 12,
+  LoadPageFault = 13,
+  StorePageFault = 15
+};
 
 struct DecodedInstruction {
   uint32_t rd_addr;
