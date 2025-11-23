@@ -27,6 +27,19 @@ inline int64_t extractJTypeImm(uint32_t raw) {
   return sext((imm << 11) >> 11);
 }
 
+inline CSROp extractCsrOp(uint32_t raw) {
+  switch (raw) {
+  case 1:
+    return CSROp::RW;
+  case 2:
+    return CSROp::RS;
+  case 3:
+    return CSROp::RC;
+  default:
+    return CSROp::NONE;
+  }
+}
+
 ALUControl get_alu_control(uint32_t raw, uint32_t opcode) {
   uint32_t f3 = funct3(raw);
   uint32_t f7 = funct7(raw);
@@ -67,11 +80,16 @@ DecodedInstruction decode(const uint32_t raw_value) {
   instr.rs2_addr = (raw_value >> 20) & 0x1F;
 
   switch (opcode) {
-  case 0x73:
-    extractITypeImm(raw_value) == 0
-        ? instr.set(Ctrl::IS_ECALL)
-        : throw std::runtime_error("Debug not implemented");
-
+  case 0x73: {
+    if (f3 == 0) {
+      instr.set(Ctrl::IS_ECALL);
+    } else {
+      instr.set(Ctrl::IS_CSR);
+      instr.immediate = extractITypeImm(raw_value);
+      instr.csr_op = extractCsrOp(f3);
+    }
+    break;
+  }
   case 0x33:
     instr.set(Ctrl::REG_WRITE);
     instr.alu_op = get_alu_control(raw_value, opcode);

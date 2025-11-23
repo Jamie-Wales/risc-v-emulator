@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ALU.h"
+#include "CSR.h"
+#include "MMU.h"
 #include "Memory.h"
 #include <array>
 #include <cstdint>
@@ -10,6 +12,8 @@ class CPU {
 private:
   uint64_t pc;
   std::array<uint64_t, 32> registers;
+  MMU mmu;
+  CSR csr;
   Memory *bus;
   ALU alu;
 
